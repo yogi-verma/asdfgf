@@ -10,6 +10,10 @@ import HourlyTable from './components/dashboard/HourlyTable.jsx'
 import ForecastTable from './components/dashboard/ForecastTable.jsx'
 import SourceDataView from './components/dashboard/SourceDataView.jsx'
 import DataQualityView from './components/dashboard/DataQualityView.jsx'
+import BacktestView from './components/dashboard/BacktestView.jsx'
+import VintageComparison from './components/dashboard/VintageComparison.jsx'
+import AlertSettings from './components/dashboard/AlertSettings.jsx'
+import AccuracyBreakdown from './components/dashboard/AccuracyBreakdown.jsx'
 import { FullScreenLoader } from './components/ui/Loader.jsx'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
@@ -94,7 +98,10 @@ export default function App() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [actualRows, setActualRows] = useState([])
   const [forecastRows, setForecastRows] = useState([])
+  const [rawForecastRows, setRawForecastRows] = useState([])
   const [forecastMetadata, setForecastMetadata] = useState(null)
+  const [dataFetchedAt, setDataFetchedAt] = useState(null)
+  const [autoRefresh, setAutoRefresh] = useState(false)
   const [loading, setLoading] = useState(true)
   const [hasLoaded, setHasLoaded] = useState(false)
   const [error, setError] = useState('')
@@ -127,12 +134,15 @@ export default function App() {
         const latestPublishTime = selectedForecasts.reduce((latest, row) => !latest || row.publishTime > latest ? row.publishTime : latest, null)
         setActualRows(actualRowsFromElexon.filter((row) => row.fuelType === 'WIND'))
         setForecastRows(selectedForecasts)
+        setRawForecastRows(forecastRowsFromElexon)
         setForecastMetadata({ latestPublishTime, decisionCutoff: publishDateTimeTo })
+        setDataFetchedAt(new Date().toISOString())
       } catch (loadError) {
         if (loadError.name !== 'AbortError') {
           setError(loadError.message || 'Could not load Elexon generation data.')
           setActualRows([])
           setForecastRows([])
+          setRawForecastRows([])
           setForecastMetadata(null)
         }
       } finally {
@@ -145,6 +155,12 @@ export default function App() {
     load()
     return () => controller.abort()
   }, [date, decisionTime, refreshKey])
+
+  useEffect(() => {
+    if (!autoRefresh) return undefined
+    const timer = setInterval(() => setRefreshKey((key) => key + 1), 5 * 60 * 1000)
+    return () => clearInterval(timer)
+  }, [autoRefresh])
 
   const rows = useMemo(() => makeComparison(actualRows, forecastRows), [actualRows, forecastRows])
   const matched = useMemo(() => rows.filter((row) => row.actual !== null && row.forecast !== null), [rows])
@@ -172,11 +188,11 @@ export default function App() {
   if (loading && !hasLoaded) return <FullScreenLoader label="Loading wind generation data from Elexon…" />
 
   return (
-    <div className="min-h-screen bg-[#f4f7f6] text-slate-900 antialiased lg:grid lg:h-screen lg:grid-cols-[224px_minmax(0,1fr)] lg:overflow-hidden">
+    <div className="min-h-screen bg-[#f6f8f7] text-slate-900 antialiased lg:grid lg:h-screen lg:grid-cols-[248px_minmax(0,1fr)] lg:overflow-hidden">
       <Sidebar active={page} onNavigate={setPage} open={menuOpen} onClose={() => setMenuOpen(false)} loading={loading} error={error} />
       <main className="min-h-screen min-w-0 lg:h-screen lg:min-h-0 lg:overflow-y-auto">
         <Topbar page={page} onMenu={() => setMenuOpen(true)} error={error} loading={loading} />
-        <div className="mx-auto w-full max-w-[1500px] px-4 py-5 sm:px-6 sm:py-6 xl:px-8">
+        <div className="mx-auto w-full max-w-[1640px] px-5 py-7 sm:px-8 sm:py-8 2xl:px-10">
           <PageToolbar
             page={page}
             date={date}
@@ -192,46 +208,51 @@ export default function App() {
           />
 
           {page === 'Overview' && <>
-            <section aria-label="Daily wind generation summary" className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+            <section aria-label="Daily wind generation summary" className="mt-6 grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-4">
               <MetricCard icon={Wind} label="Average forecast" value={formatMW(metrics.forecastMean)} unit="MW" note="WINDFOR · selected day" />
               <MetricCard icon={Zap} label="Average actual" value={formatMW(metrics.actualMean)} unit="MW" note="Matched hourly periods" tone="blue" />
               <MetricCard icon={Gauge} label="Mean absolute error" value={formatMW(metrics.mae)} unit="MW" note={`${matched.length} matched periods`} tone="amber" />
               <MetricCard icon={Clock3} label="Latest publication" value={publishTime} unit="UTC" note={`Cutoff ${decisionTime} · day before delivery`} tone="blue" />
             </section>
-            <div className="mt-4 grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_290px]">
-              <GenerationPanel rows={rows} dateLabel={deliveryLabel} publishTime={publishTime} loading={loading} error={error} mae={metrics.mae} matchedCount={matched.length} onViewAccuracy={() => setPage('Forecast accuracy')} />
+            <div className="mt-5 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+              <GenerationPanel rows={rows} dateLabel={deliveryLabel} publishTime={publishTime} loading={loading} error={error} mae={metrics.mae} matchedCount={matched.length} confidenceError={metrics.mae} onViewAccuracy={() => setPage('Forecast accuracy')} />
               <AccuracyPanel mape={metrics.mape} bias={metrics.bias} matched={matched} total={rows.length} buckets={metrics.buckets} />
             </div>
             <HourlyTable rows={rows} dateLabel={deliveryLabel} loading={loading} onExport={() => exportCsv(rows, date)} />
           </>}
 
           {page === 'Wind forecasts' && <>
-            <section aria-label="Wind forecast summary" className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <section aria-label="Wind forecast summary" className="mt-6 grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <MetricCard icon={Wind} label="Average forecast" value={formatMW(metrics.forecastMean)} unit="MW" note="Selected delivery day" />
               <MetricCard icon={Zap} label="Peak forecast" value={formatMW(metrics.forecastPeak)} unit="MW" note="Highest WINDFOR period" tone="blue" />
               <MetricCard icon={Clock3} label="Latest publication" value={publishTime} unit="UTC" note={`Decision cutoff ${decisionTime}`} tone="amber" />
               <MetricCard icon={Activity} label="Forecast periods" value={forecastRows.length} unit="hours" note="Hourly WINDFOR records" tone="blue" />
             </section>
-            <div className="mt-4"><GenerationPanel rows={rows} dateLabel={deliveryLabel} publishTime={publishTime} loading={loading} error={error} mae={metrics.mae} matchedCount={matched.length} onViewAccuracy={() => setPage('Forecast accuracy')} /></div>
+            <div className="mt-4"><GenerationPanel rows={rows} dateLabel={deliveryLabel} publishTime={publishTime} loading={loading} error={error} mae={metrics.mae} matchedCount={matched.length} confidenceError={metrics.mae} onViewAccuracy={() => setPage('Forecast accuracy')} /></div>
+            <VintageComparison rawRows={rawForecastRows} actualRows={actualRows} deliveryDate={date} cutoff={decisionTime} />
             <ForecastTable rows={forecastRows} dateLabel={deliveryLabel} loading={loading} />
           </>}
 
           {page === 'Forecast accuracy' && <>
-            <section aria-label="Forecast accuracy summary" className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <section aria-label="Forecast accuracy summary" className="mt-6 grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <MetricCard icon={Gauge} label="Mean absolute error" value={formatMW(metrics.mae)} unit="MW" note="Average absolute difference" tone="amber" />
               <MetricCard icon={Activity} label="Root mean square error" value={formatMW(metrics.rmse)} unit="MW" note="Penalises larger misses" tone="blue" />
               <MetricCard icon={Wind} label="Mean absolute percentage" value={metrics.mape === null ? '—' : metrics.mape.toFixed(1)} unit="%" note="Excludes zero actual values" />
               <MetricCard icon={Zap} label="Forecast bias" value={metrics.bias === null ? '—' : `${metrics.bias > 0 ? '+' : ''}${formatMW(metrics.bias)}`} unit="MW" note="Positive means over-forecast" tone="blue" />
             </section>
-            <div className="mt-4 grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_290px]">
-              <GenerationPanel rows={rows} dateLabel={deliveryLabel} publishTime={publishTime} loading={loading} error={error} mae={metrics.mae} matchedCount={matched.length} onViewAccuracy={() => setPage('Overview')} />
+            <div className="mt-5 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+              <GenerationPanel rows={rows} dateLabel={deliveryLabel} publishTime={publishTime} loading={loading} error={error} mae={metrics.mae} matchedCount={matched.length} confidenceError={metrics.mae} onViewAccuracy={() => setPage('Overview')} />
               <AccuracyPanel mape={metrics.mape} bias={metrics.bias} matched={matched} total={rows.length} buckets={metrics.buckets} />
             </div>
             <HourlyTable rows={rows} dateLabel={deliveryLabel} loading={loading} onExport={() => exportCsv(rows, date)} />
+            <AccuracyBreakdown rows={matched} />
           </>}
 
+          {page === 'Backtesting' && <BacktestView decisionTime={decisionTime} />}
+
           {page === 'Elexon BMRS' && <SourceDataView actualRows={actualRows} forecastRows={forecastRows} dateLabel={deliveryLabel} decisionTime={decisionTime} loading={loading} />}
-          {page === 'Data quality' && <DataQualityView actualRows={actualRows} forecastRows={forecastRows} comparison={rows} matched={matched} loading={loading} />}
+          {page === 'Data quality' && <DataQualityView actualRows={actualRows} forecastRows={forecastRows} comparison={rows} matched={matched} loading={loading} fetchedAt={dataFetchedAt} forecastPublishedAt={forecastMetadata?.latestPublishTime} />}
+          {page !== 'Backtesting' && <AlertSettings mae={metrics.mae} coverage={rows.length ? matched.length / rows.length * 100 : 0} loading={loading} fetchedAt={dataFetchedAt} onAutoRefreshChange={setAutoRefresh} />}
           <footer className="flex flex-col gap-2 py-5 text-[10px] text-slate-400 sm:flex-row sm:items-center sm:justify-between">
             <span>GridBricks · Energy decisions, made clearer.</span>
             <span>Source: Elexon BMRS · All timestamps in UTC</span>

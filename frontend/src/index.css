@@ -7,9 +7,14 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #172033;
-  background: #f4f7f6;
+  background: #f6f8f7;
   font-size: 14px;
 }
+
+::selection { background: #c9f5df; color: #123b2b; }
+
+/* Quiet, consistent scrollbars for the data-heavy views. */
+* { scrollbar-color: #cbd5d1 transparent; scrollbar-width: thin; }
 
 * {
   box-sizing: border-box;
