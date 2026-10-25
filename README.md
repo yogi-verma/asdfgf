@@ -11,7 +11,13 @@ Full-stack dashboard for comparing UK day-ahead wind generation forecasts with o
 
 GridBricks helps analysts compare Great Britain wind generation forecasts with delivered generation. Elexon BMRS publishes the relevant actuals and forecasts in separate datasets, at different time resolutions, and forecast publication time affects whether a forecast was available for a decision. This dashboard combines the data on a UTC timeline, calculates forecast accuracy, compares forecast revisions, and surfaces coverage and quality issues. It is an analysis aid, not a dispatch or trading system.
 
-> **Deployment:** Docker Compose runs the application locally. No public Vercel or Heroku URL is configured. Local dashboard: [http://localhost:3000](http://localhost:3000).
+## Live deployment
+
+- **Frontend:** [https://frontend-psi-teal-2hv7na20ud.vercel.app/](https://frontend-psi-teal-2hv7na20ud.vercel.app/)
+- **Backend API:** [https://backend-u8pg.vercel.app/](https://backend-u8pg.vercel.app/)
+- **Backend API documentation:** [https://backend-u8pg.vercel.app/docs](https://backend-u8pg.vercel.app/docs)
+
+The production frontend uses the deployed backend URL by default. Set the Vercel frontend project’s `VITE_API_BASE_URL` environment variable to `https://backend-u8pg.vercel.app` if you want to configure it explicitly, then redeploy the frontend so Vite includes the value in its static build. Docker Compose overrides this with `/api` to use its Nginx reverse proxy; local Vite development falls back to `http://localhost:8000`.
 
 ## Features
 
@@ -102,7 +108,7 @@ The app is then at `http://localhost:8080`, and the API is on host port 8001. Th
 | --- | --- | --- |
 | `FRONTEND_PORT` | `3000` | Host port mapped to Nginx port 80. |
 | `BACKEND_PORT` | `8000` | Host port mapped to FastAPI port 8000. |
-| `VITE_API_BASE_URL` | `http://localhost:8000` for Vite development; `/api` in Compose build | Frontend API base URL. Compose sets it at build time so Nginx can proxy internally. |
+| `VITE_API_BASE_URL` | Local Vite: `http://localhost:8000`; production build: `https://backend-u8pg.vercel.app`; Compose build: `/api` | Frontend API base URL. It can be set in Vercel project environment variables; Compose supplies `/api` at build time for the Nginx proxy. |
 
 ## Run without Docker
 
@@ -190,4 +196,4 @@ Shared shell components: `Sidebar.jsx` navigation, `Topbar.jsx` app bar, `PageTo
 
 ## Limitations and data source
 
-The local Compose setup is not public hosting; no Vercel/Heroku app link is configured. Elexon availability and data determine results. There is no server database, historical archive, or external alert delivery. Public source: [Elexon BMRS](https://data.elexon.co.uk/bmrs); API references: [FUELHH](https://bmrs.elexon.co.uk/api-documentation/endpoint/datasets/FUELHH/stream) and [WINDFOR](https://bmrs.elexon.co.uk/api-documentation/endpoint/datasets/WINDFOR/stream).
+The Vercel URLs above are the current deployment addresses; if Vercel assigns new URLs, update the production API fallback in `frontend/src/App.jsx` and `frontend/src/components/dashboard/BacktestView.jsx`, the allowed frontend origin in `backend/app/main.py`, and this section. Elexon availability and data determine results. There is no server database, historical archive, or external alert delivery. Public source: [Elexon BMRS](https://data.elexon.co.uk/bmrs); API references: [FUELHH](https://bmrs.elexon.co.uk/api-documentation/endpoint/datasets/FUELHH/stream) and [WINDFOR](https://bmrs.elexon.co.uk/api-documentation/endpoint/datasets/WINDFOR/stream).

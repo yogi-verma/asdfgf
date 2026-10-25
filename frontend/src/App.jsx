@@ -16,7 +16,7 @@ import AlertSettings from './components/dashboard/AlertSettings.jsx'
 import AccuracyBreakdown from './components/dashboard/AccuracyBreakdown.jsx'
 import { FullScreenLoader } from './components/ui/Loader.jsx'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+const API_BASE = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? 'https://backend-u8pg.vercel.app' : 'http://localhost:8000')
 
 function asNumber(value) {
   return value === null || value === undefined ? null : Number(value)

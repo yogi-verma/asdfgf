@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Activity, CalendarRange, Play, TrendingDown } from 'lucide-react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+const API_BASE = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? 'https://backend-u8pg.vercel.app' : 'http://localhost:8000')
 const MIN_DATE = '2026-01-01'
 const MAX_DATE = '2026-01-31'
 
