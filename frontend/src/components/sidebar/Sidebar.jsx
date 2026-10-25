@@ -26,7 +26,7 @@ export default function Sidebar({ active, onNavigate, open, onClose, loading, er
   return (
     <>
       {open && <button aria-label="Close navigation" onClick={onClose} className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-[1px] lg:hidden" />}
-      <aside className={`fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col border-r border-white/[0.06] bg-[#111b24] px-4 py-5 text-white shadow-2xl transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:translate-x-0 lg:shadow-none ${open ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-[248px] flex-col border-r border-white/[0.06] bg-[#111b24] px-4 py-5 text-white shadow-2xl transition-transform duration-200 lg:sticky lg:top-0 lg:h-dvh lg:min-h-0 lg:overflow-y-auto lg:translate-x-0 lg:shadow-none ${open ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex h-11 items-center justify-between px-1">
           <div className="flex items-center gap-3">
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-400 text-[#0b1726]"><Wind size={19} strokeWidth={2.3} /></span>

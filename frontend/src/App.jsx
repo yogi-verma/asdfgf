@@ -188,9 +188,9 @@ export default function App() {
   if (loading && !hasLoaded) return <FullScreenLoader label="Loading wind generation data from Elexon…" />
 
   return (
-    <div className="min-h-screen bg-[#f6f8f7] text-slate-900 antialiased lg:grid lg:h-screen lg:grid-cols-[248px_minmax(0,1fr)] lg:overflow-hidden">
+    <div className="grid h-dvh grid-cols-1 overflow-hidden bg-[#f6f8f7] text-slate-900 antialiased lg:grid-cols-[248px_minmax(0,1fr)]">
       <Sidebar active={page} onNavigate={setPage} open={menuOpen} onClose={() => setMenuOpen(false)} loading={loading} error={error} />
-      <main className="min-h-screen min-w-0 lg:h-screen lg:min-h-0 lg:overflow-y-auto">
+      <main className="h-dvh min-h-0 min-w-0 overflow-y-auto overscroll-contain">
         <Topbar page={page} onMenu={() => setMenuOpen(true)} error={error} loading={loading} />
         <div className="mx-auto w-full max-w-[1640px] px-5 py-7 sm:px-8 sm:py-8 2xl:px-10">
           <PageToolbar
