@@ -1,3 +1,5 @@
+import { Loader } from '../ui/Loader.jsx'
+
 function QualityCard({ label, value, detail, healthy }) {
   return <article className="rounded-lg border border-slate-200/80 bg-white p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)]"><div className="flex items-center justify-between gap-2"><h3 className="text-[10px] font-semibold text-slate-500">{label}</h3><span className={`rounded-full px-1.5 py-0.5 text-[8px] font-bold ${healthy ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>{healthy ? 'OK' : 'CHECK'}</span></div><p className="mt-2 text-[20px] font-semibold leading-none tracking-tight text-slate-900 tabular-nums">{value}</p><p className="mt-1.5 text-[9px] text-slate-400">{detail}</p></article>
 }
@@ -19,7 +21,7 @@ export default function DataQualityView({ actualRows, forecastRows, comparison, 
   return (
     <>
       <section className="mt-4 rounded-lg border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-        <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-[12px] font-semibold text-slate-800">Daily data quality</h2><p className="mt-0.5 text-[9px] text-slate-400">Completeness and consistency checks for the selected date</p></div><span className={`rounded-full px-2 py-1 text-[9px] font-bold ${complete ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>{loading ? 'CHECKING' : complete ? 'ALL CHECKS PASSED' : 'REVIEW DATA'}</span></div>
+        <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-[12px] font-semibold text-slate-800">Daily data quality</h2><p className="mt-0.5 text-[9px] text-slate-400">Completeness and consistency checks for the selected date</p></div><span className={`rounded-full px-2 py-1 text-[9px] font-bold ${complete ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>{loading ? <Loader label="Checking data" /> : complete ? 'ALL CHECKS PASSED' : 'REVIEW DATA'}</span></div>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <QualityCard label="Actual interval coverage" value={`${actualCoverage}%`} detail={`${uniqueActuals} of ${expectedActuals} half-hour periods`} healthy={actualCoverage === 100} />
           <QualityCard label="Forecast interval coverage" value={`${forecastCoverage}%`} detail={`${uniqueForecasts} of ${expectedForecasts} hourly periods`} healthy={forecastCoverage === 100} />

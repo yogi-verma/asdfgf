@@ -1,4 +1,5 @@
 import { CalendarDays, CircleHelp, Clock3, Download, ExternalLink, RefreshCw } from 'lucide-react'
+import { Loader } from '../ui/Loader.jsx'
 
 export default function PageToolbar({ page, date, decisionTime, onDateChange, onDecisionTimeChange, onRefresh, onExport, disabledExport, loading, error, apiBase }) {
   return (
@@ -12,7 +13,7 @@ export default function PageToolbar({ page, date, decisionTime, onDateChange, on
         <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-end">
           <label className="flex h-9 min-w-0 items-center gap-2 rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-medium text-slate-600 shadow-sm"><CalendarDays size={14} className="shrink-0 text-slate-400" /><input aria-label="Delivery date" type="date" min="2026-01-01" max="2026-01-31" value={date} onChange={(event) => onDateChange(event.target.value)} className="w-full min-w-0 bg-transparent text-[11px] outline-none sm:w-[118px]" /></label>
           <label className="flex h-9 min-w-0 flex-col justify-center rounded-md border border-slate-200 bg-white px-2.5 shadow-sm"><span className="text-[8px] font-bold uppercase tracking-wide text-slate-400">Cutoff · UTC</span><input aria-label="Forecast decision cutoff in UTC" type="time" value={decisionTime} onChange={(event) => onDecisionTimeChange(event.target.value)} className="w-full bg-transparent text-[11px] font-medium leading-tight text-slate-700 outline-none sm:w-[78px]" /></label>
-          <button onClick={onRefresh} className="flex h-9 items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-medium text-slate-600 shadow-sm hover:bg-slate-50"><RefreshCw size={13} className={loading ? 'animate-spin text-emerald-600' : 'text-slate-400'} />Refresh</button>
+          <button onClick={onRefresh} disabled={loading} className="flex h-9 items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 text-[11px] font-medium text-slate-600 shadow-sm hover:bg-slate-50 disabled:cursor-wait disabled:opacity-75">{loading ? <Loader label="Refreshing" /> : <><RefreshCw size={13} className="text-slate-400" />Refresh</>}</button>
           <button onClick={onExport} disabled={disabledExport} className="flex h-9 items-center justify-center gap-1.5 rounded-md bg-[#14243a] px-3 text-[11px] font-semibold text-white shadow-sm hover:bg-[#203954] disabled:cursor-not-allowed disabled:opacity-40"><Download size={13} />Export</button>
         </div>
       </section>

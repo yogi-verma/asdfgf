@@ -1,5 +1,6 @@
 import { Activity, ArrowRight, Clock3 } from 'lucide-react'
 import { Area, AreaChart, CartesianGrid, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Loader, LoadingPanel } from '../ui/Loader.jsx'
 
 function ChartTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null
@@ -20,7 +21,7 @@ export default function GenerationPanel({ rows, dateLabel, publishTime, loading,
       </div>
       <div className="flex items-center justify-between px-4 pt-3">
         <div className="flex gap-3 text-[9px] font-medium text-slate-500"><span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />Forecast</span><span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-sky-500" />Actual hourly mean</span></div>
-        {loading && <span className="text-[9px] text-slate-400">Updating…</span>}
+        {loading && <Loader label="Updating" />}
       </div>
       <div className="h-[220px] min-w-0 px-1 pb-2 pt-3 sm:h-[250px] sm:px-3">
         {rows.length ? <ResponsiveContainer width="100%" height="100%"><AreaChart data={rows} margin={{ top: 6, right: 8, bottom: 0, left: -12 }}>
@@ -31,7 +32,7 @@ export default function GenerationPanel({ rows, dateLabel, publishTime, loading,
           <Tooltip content={<ChartTooltip />} />
           <Area type="monotone" dataKey="forecast" name="forecast" stroke="#079669" strokeWidth={2} fill="url(#windForecastFill)" activeDot={{ r: 3, strokeWidth: 0 }} />
           <Line type="monotone" dataKey="actual" name="actual" stroke="#3b91c9" strokeWidth={1.8} dot={false} activeDot={{ r: 3, strokeWidth: 0 }} connectNulls={false} />
-        </AreaChart></ResponsiveContainer> : <div className="grid h-full place-items-center px-5 text-center text-[10px] text-slate-400">{loading ? 'Loading generation data…' : error ? 'Resolve the connection to view this chart.' : 'No forecast points are available for this date and cutoff.'}</div>}
+        </AreaChart></ResponsiveContainer> : loading ? <LoadingPanel label="Loading generation data…" /> : <div className="grid h-full place-items-center px-5 text-center text-[10px] text-slate-400">{error ? 'Resolve the connection to view this chart.' : 'No forecast points are available for this date and cutoff.'}</div>}
       </div>
       <div className="mx-3 mb-3 flex flex-col gap-2 rounded-md bg-[#f4f9f7] px-3 py-2.5 sm:mx-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2 text-[10px] text-slate-600"><span className="grid h-6 w-6 shrink-0 place-items-center rounded bg-emerald-100 text-emerald-700"><Activity size={12} /></span><span className="font-semibold text-slate-700">{mae === null ? 'Accuracy appears when actuals and forecasts overlap.' : `MAE ${Math.round(mae).toLocaleString('en-GB')} MW across ${matchedCount} hours`}</span></div>

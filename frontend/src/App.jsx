@@ -10,6 +10,7 @@ import HourlyTable from './components/dashboard/HourlyTable.jsx'
 import ForecastTable from './components/dashboard/ForecastTable.jsx'
 import SourceDataView from './components/dashboard/SourceDataView.jsx'
 import DataQualityView from './components/dashboard/DataQualityView.jsx'
+import { FullScreenLoader } from './components/ui/Loader.jsx'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
@@ -95,6 +96,7 @@ export default function App() {
   const [forecastRows, setForecastRows] = useState([])
   const [forecastMetadata, setForecastMetadata] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [hasLoaded, setHasLoaded] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -134,7 +136,10 @@ export default function App() {
           setForecastMetadata(null)
         }
       } finally {
-        if (!controller.signal.aborted) setLoading(false)
+        if (!controller.signal.aborted) {
+          setLoading(false)
+          setHasLoaded(true)
+        }
       }
     }
     load()
@@ -164,11 +169,13 @@ export default function App() {
     : '—'
   const deliveryLabel = new Date(`${date}T12:00:00Z`).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
 
+  if (loading && !hasLoaded) return <FullScreenLoader label="Loading wind generation data from Elexon…" />
+
   return (
     <div className="min-h-screen bg-[#f4f7f6] text-slate-900 antialiased lg:grid lg:h-screen lg:grid-cols-[224px_minmax(0,1fr)] lg:overflow-hidden">
       <Sidebar active={page} onNavigate={setPage} open={menuOpen} onClose={() => setMenuOpen(false)} loading={loading} error={error} />
       <main className="min-h-screen min-w-0 lg:h-screen lg:min-h-0 lg:overflow-y-auto">
-        <Topbar page={page} onMenu={() => setMenuOpen(true)} error={error} />
+        <Topbar page={page} onMenu={() => setMenuOpen(true)} error={error} loading={loading} />
         <div className="mx-auto w-full max-w-[1500px] px-4 py-5 sm:px-6 sm:py-6 xl:px-8">
           <PageToolbar
             page={page}
