@@ -118,10 +118,10 @@ export default function App() {
         publicationStart.setUTCDate(publicationStart.getUTCDate() - 1)
         const publishDateTimeFrom = publicationStart.toISOString()
         const publishDateTimeTo = `${cutoffDate.toISOString().slice(0, 10)}T${decisionTime}:00.000Z`
-        const forecastUrl = new URL(`${API_BASE}/datasets/WINDFOR/stream`)
+        const forecastUrl = new URL(`${API_BASE}/datasets/WINDFOR/stream`, window.location.origin)
         forecastUrl.searchParams.set('publishDateTimeFrom', publishDateTimeFrom)
         forecastUrl.searchParams.set('publishDateTimeTo', publishDateTimeTo)
-        const actualUrl = new URL(`${API_BASE}/datasets/FUELHH/stream`)
+        const actualUrl = new URL(`${API_BASE}/datasets/FUELHH/stream`, window.location.origin)
         actualUrl.searchParams.set('settlementDateFrom', date)
         actualUrl.searchParams.set('settlementDateTo', date)
         actualUrl.searchParams.set('fuelType', 'WIND')

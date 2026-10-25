@@ -81,15 +81,15 @@ export default function BacktestView({ decisionTime = '23:59' }) {
       const data = []
       for (let offset = 0; offset < days.length; offset += 4) {
         const batch = await Promise.all(days.slice(offset, offset + 4).map(async (date) => {
-        const actualUrl = new URL(`${API_BASE}/datasets/FUELHH/stream`)
+        const actualUrl = new URL(`${API_BASE}/datasets/FUELHH/stream`, window.location.origin)
         actualUrl.searchParams.set('settlementDateFrom', date); actualUrl.searchParams.set('settlementDateTo', date); actualUrl.searchParams.set('fuelType', 'WIND')
         const start = new Date(`${date}T00:00:00Z`); start.setUTCDate(start.getUTCDate() - 2)
-        const forecastUrl = new URL(`${API_BASE}/datasets/WINDFOR/stream`)
+        const forecastUrl = new URL(`${API_BASE}/datasets/WINDFOR/stream`, window.location.origin)
         const cutoffDay = new Date(`${date}T00:00:00Z`); cutoffDay.setUTCDate(cutoffDay.getUTCDate() - 1)
         forecastUrl.searchParams.set('publishDateTimeFrom', start.toISOString()); forecastUrl.searchParams.set('publishDateTimeTo', `${cutoffDay.toISOString().slice(0, 10)}T${decisionTime}:00.000Z`)
         const priorDate = new Date(`${date}T00:00:00Z`); priorDate.setUTCDate(priorDate.getUTCDate() - 1)
         const prior = priorDate.toISOString().slice(0, 10)
-        const priorUrl = new URL(`${API_BASE}/datasets/FUELHH/stream`)
+        const priorUrl = new URL(`${API_BASE}/datasets/FUELHH/stream`, window.location.origin)
         priorUrl.searchParams.set('settlementDateFrom', prior); priorUrl.searchParams.set('settlementDateTo', prior); priorUrl.searchParams.set('fuelType', 'WIND')
         const [actual, forecast, priorActual] = await Promise.all([json(actualUrl), json(forecastUrl), json(priorUrl)])
         return summarize(actual, forecast, date, priorActual, decisionTime)
