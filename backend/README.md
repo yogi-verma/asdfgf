@@ -10,11 +10,9 @@ python -m pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-The health check is available at `http://localhost:8000/api/health`.
-
 Generation routes:
 
-- `GET /api/actual-generation?delivery_date=2026-01-15` fetches national WIND actuals from FUELHH.
-- `GET /api/forecast-generation?delivery_date=2026-01-15&decision_time=23:59` fetches WINDFOR publications from the preceding day and returns the latest revision per target time available by the UTC cutoff.
+- `GET /datasets/FUELHH/stream?settlementDateFrom=2026-01-15&settlementDateTo=2026-01-15&fuelType=WIND` proxies Elexon's FUELHH stream with the same settlement date and fuel type parameters, returning its generation records as an array.
+- `GET /datasets/WINDFOR/stream?publishDateTimeFrom=2026-01-13T00:00:00.000Z&publishDateTimeTo=2026-01-14T23:59:00.000Z` proxies Elexon's WINDFOR stream with the same query parameter names and row-array response contract. It searches back to D-2 00:00 UTC so the frontend can select the latest revision for each delivery period by the D-1 decision cutoff.
 
-WINDFOR is hourly while FUELHH is half-hourly in the returned data. The frontend averages each pair of FUELHH records to compare with hourly forecast values. Confirm the operational decision cutoff with the energy desk before using accuracy results as a production decision input.
+The frontend compares hourly WINDFOR values with the mean of the available half-hourly FUELHH records to display MAE, RMSE, MAPE, forecast bias, and data coverage.

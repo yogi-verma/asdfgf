@@ -25,7 +25,7 @@ npm run dev
 - Backend API: http://localhost:8000
 - API docs: http://localhost:8000/docs
 
-The API exposes `/api/actual-generation?delivery_date=YYYY-MM-DD` and `/api/forecast-generation?delivery_date=YYYY-MM-DD&decision_time=HH:MM`. The forecast cutoff is UTC on the day before delivery and defaults to `23:59`.
+The backend mirrors Elexon's `/datasets/FUELHH/stream` and `/datasets/WINDFOR/stream` endpoints with the documented query parameters and row-array responses. The frontend selects WIND actuals and the latest forecast revision for the chosen delivery day, then computes the displayed accuracy metrics. The intended delivery dates are in January 2026.
 
 ## Stack
 

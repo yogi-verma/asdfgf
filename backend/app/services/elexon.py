@@ -1,4 +1,4 @@
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import date, datetime, timezone
 from typing import Any
 
 import httpx
@@ -11,7 +11,7 @@ class ElexonUpstreamError(Exception):
     """Raised when the Elexon API cannot provide a usable response."""
 
 
-async def _get_rows(path: str, params: dict[str, str]) -> list[dict[str, Any]]:
+async def _get_rows(path: str, params: dict[str, Any]) -> list[dict[str, Any]]:
     url = f"{ELEXON_BASE_URL}{path}"
     try:
         async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT) as client:
@@ -26,53 +26,38 @@ async def _get_rows(path: str, params: dict[str, str]) -> list[dict[str, Any]]:
     return payload
 
 
-async def get_wind_actuals(delivery_date: date) -> list[dict[str, Any]]:
-    """Fetch half-hourly GB wind outturn for one settlement date."""
+async def get_fuelhh_rows(
+    settlement_date_from: date,
+    settlement_date_to: date,
+    settlement_period: list[int] | None = None,
+    fuel_type: list[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Proxy the documented FUELHH stream query and preserve its row shape."""
+    params: dict[str, Any] = {
+        "settlementDateFrom": settlement_date_from.isoformat(),
+        "settlementDateTo": settlement_date_to.isoformat(),
+    }
+    if settlement_period:
+        params["settlementPeriod"] = settlement_period
+    if fuel_type:
+        params["fuelType"] = fuel_type
+    return await _get_rows("/datasets/FUELHH/stream", params)
+
+
+async def get_wind_forecast_rows(
+    publish_date_time_from: datetime, publish_date_time_to: datetime
+) -> list[dict[str, Any]]:
+    """Proxy the documented WINDFOR stream query and preserve its row shape."""
+    if publish_date_time_from.tzinfo is None or publish_date_time_to.tzinfo is None:
+        raise ValueError("WINDFOR publication bounds must include a timezone.")
     return await _get_rows(
-        "/datasets/FUELHH/stream",
-        {
-            "settlementDateFrom": delivery_date.isoformat(),
-            "settlementDateTo": delivery_date.isoformat(),
-            "fuelType": "WIND",
-        },
-    )
-
-
-async def get_wind_forecast(
-    delivery_date: date, decision_time: time
-) -> tuple[list[dict[str, Any]], datetime]:
-    """Select the latest WINDFOR revision available by the D-1 cutoff.
-
-    WINDFOR is filtered upstream by publication time. We request publications
-    from midnight on D-1 through the supplied cutoff, then retain rows whose
-    target startTime falls on the requested delivery date.
-    """
-    publication_date = delivery_date - timedelta(days=1)
-    cutoff = datetime.combine(publication_date, decision_time, tzinfo=timezone.utc)
-    from_time = datetime.combine(publication_date, time.min, tzinfo=timezone.utc)
-    rows = await _get_rows(
         "/datasets/WINDFOR/stream",
         {
-            "publishDateTimeFrom": from_time.isoformat().replace("+00:00", "Z"),
-            "publishDateTimeTo": cutoff.isoformat().replace("+00:00", "Z"),
+            "publishDateTimeFrom": publish_date_time_from.astimezone(timezone.utc)
+            .isoformat(timespec="milliseconds")
+            .replace("+00:00", "Z"),
+            "publishDateTimeTo": publish_date_time_to.astimezone(timezone.utc)
+            .isoformat(timespec="milliseconds")
+            .replace("+00:00", "Z"),
         },
     )
-
-    latest_by_start: dict[str, dict[str, Any]] = {}
-    for row in rows:
-        start_time = row.get("startTime")
-        publish_time = row.get("publishTime")
-        if not start_time or not publish_time:
-            continue
-        try:
-            target_time = datetime.fromisoformat(start_time.replace("Z", "+00:00"))
-            published_at = datetime.fromisoformat(publish_time.replace("Z", "+00:00"))
-        except (AttributeError, ValueError):
-            continue
-        if target_time.date() != delivery_date or published_at > cutoff:
-            continue
-        current = latest_by_start.get(start_time)
-        if current is None or publish_time > current["publishTime"]:
-            latest_by_start[start_time] = row
-
-    return sorted(latest_by_start.values(), key=lambda row: row["startTime"]), cutoff
