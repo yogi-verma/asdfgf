@@ -6,15 +6,15 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #172033;
-  background: #f6f8f7;
-  font-size: 14px;
+  color: #182b49;
+  background: #f3f6fb;
+  font-size: 16px;
 }
 
-::selection { background: #c9f5df; color: #123b2b; }
+::selection { background: #d9e7ff; color: #17365f; }
 
 /* Quiet, consistent scrollbars for the data-heavy views. */
-* { scrollbar-color: #cbd5d1 transparent; scrollbar-width: thin; }
+* { scrollbar-color: #cbd5df transparent; scrollbar-width: thin; }
 
 * {
   box-sizing: border-box;
@@ -42,6 +42,6 @@ button {
 button:focus-visible,
 input:focus-visible,
 a:focus-visible {
-  outline: 2px solid #10b981;
+  outline: 2px solid #4f78bb;
   outline-offset: 2px;
 }

@@ -188,11 +188,11 @@ export default function App() {
   if (loading && !hasLoaded) return <FullScreenLoader label="Loading wind generation data from Elexon…" />
 
   return (
-    <div className="grid h-dvh grid-cols-1 overflow-hidden bg-[#f6f8f7] text-slate-900 antialiased lg:grid-cols-[248px_minmax(0,1fr)]">
+    <div className="grid h-dvh grid-cols-1 overflow-hidden bg-[#f3f6fb] text-slate-900 antialiased lg:grid-cols-[248px_minmax(0,1fr)]">
       <Sidebar active={page} onNavigate={setPage} open={menuOpen} onClose={() => setMenuOpen(false)} loading={loading} error={error} />
       <main className="h-dvh min-h-0 min-w-0 overflow-y-auto overscroll-contain">
         <Topbar page={page} onMenu={() => setMenuOpen(true)} error={error} loading={loading} />
-        <div className="mx-auto w-full max-w-[1640px] px-5 py-7 sm:px-8 sm:py-8 2xl:px-10">
+        <div className="mx-auto w-full max-w-[1720px] px-4 py-5 sm:px-7 sm:py-7 2xl:px-10">
           <PageToolbar
             page={page}
             date={date}
@@ -208,13 +208,13 @@ export default function App() {
           />
 
           {page === 'Overview' && <>
-            <section aria-label="Daily wind generation summary" className="mt-6 grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-4">
+            <section aria-label="Daily wind generation summary" className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4">
               <MetricCard icon={Wind} label="Average forecast" value={formatMW(metrics.forecastMean)} unit="MW" note="WINDFOR · selected day" />
               <MetricCard icon={Zap} label="Average actual" value={formatMW(metrics.actualMean)} unit="MW" note="Matched hourly periods" tone="blue" />
               <MetricCard icon={Gauge} label="Mean absolute error" value={formatMW(metrics.mae)} unit="MW" note={`${matched.length} matched periods`} tone="amber" />
               <MetricCard icon={Clock3} label="Latest publication" value={publishTime} unit="UTC" note={`Cutoff ${decisionTime} · day before delivery`} tone="blue" />
             </section>
-            <div className="mt-5 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="mt-4 grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_290px]">
               <GenerationPanel rows={rows} dateLabel={deliveryLabel} publishTime={publishTime} loading={loading} error={error} mae={metrics.mae} matchedCount={matched.length} confidenceError={metrics.mae} onViewAccuracy={() => setPage('Forecast accuracy')} />
               <AccuracyPanel mape={metrics.mape} bias={metrics.bias} matched={matched} total={rows.length} buckets={metrics.buckets} />
             </div>
@@ -222,7 +222,7 @@ export default function App() {
           </>}
 
           {page === 'Wind forecasts' && <>
-            <section aria-label="Wind forecast summary" className="mt-6 grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <section aria-label="Wind forecast summary" className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <MetricCard icon={Wind} label="Average forecast" value={formatMW(metrics.forecastMean)} unit="MW" note="Selected delivery day" />
               <MetricCard icon={Zap} label="Peak forecast" value={formatMW(metrics.forecastPeak)} unit="MW" note="Highest WINDFOR period" tone="blue" />
               <MetricCard icon={Clock3} label="Latest publication" value={publishTime} unit="UTC" note={`Decision cutoff ${decisionTime}`} tone="amber" />
@@ -234,13 +234,13 @@ export default function App() {
           </>}
 
           {page === 'Forecast accuracy' && <>
-            <section aria-label="Forecast accuracy summary" className="mt-6 grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <section aria-label="Forecast accuracy summary" className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <MetricCard icon={Gauge} label="Mean absolute error" value={formatMW(metrics.mae)} unit="MW" note="Average absolute difference" tone="amber" />
               <MetricCard icon={Activity} label="Root mean square error" value={formatMW(metrics.rmse)} unit="MW" note="Penalises larger misses" tone="blue" />
               <MetricCard icon={Wind} label="Mean absolute percentage" value={metrics.mape === null ? '—' : metrics.mape.toFixed(1)} unit="%" note="Excludes zero actual values" />
               <MetricCard icon={Zap} label="Forecast bias" value={metrics.bias === null ? '—' : `${metrics.bias > 0 ? '+' : ''}${formatMW(metrics.bias)}`} unit="MW" note="Positive means over-forecast" tone="blue" />
             </section>
-            <div className="mt-5 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="mt-4 grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_290px]">
               <GenerationPanel rows={rows} dateLabel={deliveryLabel} publishTime={publishTime} loading={loading} error={error} mae={metrics.mae} matchedCount={matched.length} confidenceError={metrics.mae} onViewAccuracy={() => setPage('Overview')} />
               <AccuracyPanel mape={metrics.mape} bias={metrics.bias} matched={matched} total={rows.length} buckets={metrics.buckets} />
             </div>

@@ -28,7 +28,7 @@ export function FullScreenLoader({ label = 'Preparing your workspace' }) {
   return (
     <div role="status" aria-live="polite" aria-label={label} className="fixed inset-0 z-[100] grid place-items-center bg-[#f4f7f6] px-4">
       <div className="flex min-w-[230px] flex-col items-center rounded-2xl border border-slate-200/80 bg-white px-9 py-8 shadow-[0_16px_48px_rgba(15,23,42,0.08)]">
-        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-500 shadow-lg shadow-emerald-500/20">
+      <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#284b79] shadow-lg shadow-blue-900/20">
           <span aria-hidden="true" className="h-6 w-6 animate-spin rounded-full border-[3px] border-white/35 border-t-white motion-reduce:animate-none" />
         </span>
         <p className="mt-4 text-sm font-semibold tracking-tight text-slate-800">GridBricks</p>

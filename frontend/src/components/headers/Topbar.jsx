@@ -4,10 +4,10 @@ import { Loader } from '../ui/Loader.jsx'
 export default function Topbar({ page, onMenu, error, loading }) {
   return (
     <header className="sticky top-0 z-30 h-[58px] border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
-      <div className="flex h-full items-center justify-between px-5 sm:px-8 2xl:px-10">
+      <div className="flex h-full items-center justify-between px-4 sm:px-6 2xl:px-8">
         <div className="flex min-w-0 items-center gap-2.5">
           <button onClick={onMenu} aria-label="Open menu" className="grid h-8 w-8 place-items-center rounded-md text-slate-500 transition hover:bg-slate-100 lg:hidden"><Menu size={16} /></button>
-          <p className="truncate text-[12px] text-slate-400">GridBricks <span className="mx-2 text-slate-300">/</span><span className="font-semibold text-slate-700">{page === 'Overview' ? 'Market overview' : page}</span></p>
+          <p className="truncate text-[12px] text-slate-400">GridBricks <span className="mx-2 text-slate-300">/</span><span className="font-semibold text-[#284b79]">{page === 'Overview' ? 'Market overview' : page}</span></p>
         </div>
         <div className="flex items-center gap-3">
           {loading && <Loader label="Syncing" className="hidden sm:inline-flex" />}
